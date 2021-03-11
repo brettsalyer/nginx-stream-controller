@@ -1,0 +1,39 @@
+body {
+    background-color: rgb(56, 57, 58) !important;
+}
+
+#church-logo {
+    padding: 25px 25px 25px 25px;
+}
+
+.header-roboto {
+    font-family: 'Roboto';
+    color: white;
+    font-size: 28px;
+    font-weight: 100;
+}
+
+.control {
+    border-radius: 10px;
+    font-family: 'Roboto';
+    color: white;
+    font-size: 16px;
+    font-weight: 100;
+    width: 25%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .center-div {
+    margin: auto;
+    width: 50%;
+    padding: 10px;  
+  }

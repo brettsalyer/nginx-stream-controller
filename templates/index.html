@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+    integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+    integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="./static/main.css">
+  <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <script type = "text/javascript" src = "{{ url_for('static', filename = 'removeStream.js') }}" ></script>
+</head>
+
+<body>
+  <div id="church-logo">
+    <img src="/static/logo.png" , alt="Tri-County Church of the Nazarene">
+  </div>
+
+
+  <h1 class="center header-roboto">Live Stream Configuration</h1>
+  <br />
+
+  <form class="control center-div" action="http://localhost:8080/update" method='post'>
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">Application Name</span>
+      </div>
+      <input name="name" type="text" class="form-control" placeholder="{{result['name']}}" aria-label="app-name"
+        aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">Listening Port</span>
+      </div>
+      <input name="port" type="text" class="form-control" placeholder="{{result['port']}}" aria-label="port"
+        aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">Chunk Size</span>
+      </div>
+      <input name="chunk" type="text" class="form-control" placeholder="{{result['chunk']}}" aria-label="chunk"
+        aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="form-check form-switch">
+      <label class="form-check-label" for="flexSwitchCheckDefault">Live On / Off</label>
+      <input name="livestatus" class="form-check-input" type="checkbox" id="livecheck">
+      <!--Set the value of the checkbox-->
+      <script>
+        {% if result['status'] == 'on' %}
+        document.getElementById("livecheck").checked = true
+        {% else %}
+        document.getElementById("livecheck").checked = false
+        {% endif %}
+      </script>
+    </div>
+    <br />
+    <h3>Streams Pushed</h3>
+
+    <!--Add Stream-->
+    <div class="input-group mb-3">
+      <script>
+        function addStream() {
+          data = document.getElementById("newStream").value;
+          if(data.replace(/\s/g, '').length){
+            console.log("Adding Stream")
+            destDiv = document.getElementById("streamList");
+            console.log(data)
+
+            itemDiv = document.createElement("div");
+            itemDiv.classList.add("input-group");
+            itemDiv.classList.add("mb-3");
+            itemDiv.id = data;
+            console.log("Item ID", itemDiv.id);
+
+            input = document.createElement("input");
+            input.setAttribute("name", data);
+            input.setAttribute("type", "text");
+            input.classList.add("form-control");
+            input.setAttribute("aria-label", "stream-url");
+            input.setAttribute("aria-describedby", "basic-addon2");
+            input.setAttribute("value", data);
+
+            buttonDiv = document.createElement("div");
+            buttonDiv.classList.add("input-group-append");
+
+            button = document.createElement("button");
+            button.setAttribute("onclick", "removeStream(" + "'" + data + "'" + ")");
+            button.classList.add("btn");
+            button.classList.add("btn-primary");
+            button.setAttribute("type", "button");
+            button.textContent = "Remove";
+
+            itemDiv.appendChild(input);
+            itemDiv.appendChild(buttonDiv);
+            buttonDiv.appendChild(button);
+            destDiv.appendChild(itemDiv);
+
+            console.log(itemDiv);
+            document.getElementById("newStream").value = "";
+          }
+          
+
+        }
+      </script>
+
+      <input id="newStream" type="text" class="form-control" placeholder="rtmp://" aria-label="stream-url"
+        aria-describedby="basic-addon2">
+      <div class="input-group-append">
+        <button onclick="addStream()" class="btn btn-primary" type="button">Add Stream</button>
+      </div>
+    </div>
+
+    <div id="streamList">
+
+      <!--Add all streams-->
+      {% for item in result['streams'] %}
+
+      <div id="{{item}}" class="input-group mb-3">
+        <input name="{{item}}" type="text" class="form-control" aria-label="stream-url" aria-describedby="basic-addon2"
+          value={{item}}>
+        <div class="input-group-append">
+          <button onclick="removeStream('{{item}}')" class="btn btn-primary" type="button">Remove</button>
+        </div>
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+    <br />
+
+    <!--Control Buttons-->
+    <div>
+      <button action="http://localhost:8080/update" class="btn btn-primary" type="submit">Update</button>
+      <button class="btn btn-primary" type="button">Restart</button>
+    </div>
+
+  </form>
+
+
+
+</body>
+
+</html>
