@@ -47,7 +47,7 @@ class NginxConf:
                                                             print("Live status: ", live_status)                                                       
                                                         if 'push' == k:
                                                             pushed_streams.append(app_item['args'][0])
-        print("Pushing to: ", pushed_streams)
+
         return {
             'port' : sever_port,
             "chunk" : chunk_size,
@@ -56,14 +56,35 @@ class NginxConf:
             "streams" : pushed_streams
         }
 
-    def update_rtmp_conf(self, updates):
+    def update_rtmp_conf(self, request_form):
         
         config = crossplane.parse(self.file) 
         configs = config['config']
+
+        request_form = request_form.to_dict(flat=False)
+        print("Updating:", request_form)
+
+        new_name = request_form.pop('name')
+        new_port = request_form.pop('port')
+        new_chunk = request_form.pop('chunk')
+        new_livestatus = None
+        try:
+            new_livestatus = request_form.pop('livestatus')
+        except:
+            print("Live Status is set to off")
+            new_livestatus = ['off']
+        
+        new_streams = []
+        for item in request_form:
+            new_streams.append(item)
+
+        
+
+        print("===== WRITING TO FILE =====")
+
         for conf in configs:
             for key, value in conf.items():
                 if key == 'parsed':
-                    #print(key, value)
                     for dict_item in value:
                         if 'directive' in dict_item and 'rtmp' == dict_item['directive']:
                             for block_item in dict_item['block']:
@@ -71,24 +92,39 @@ class NginxConf:
                                     # This is where I can finally extract all the properties I need to edit
                                     for k, v in subdic.items():
                                         if 'directive' == k and v == 'listen':
-                                            subdic['args'][0] = [updates['port']]
-                                            print("New Server Port: ", subdic['args'][0])                     
+                                            subdic['args'] = new_port
+                                            print("Writing new port: ", new_port)
                                         if 'directive' == k and v == 'chunk_size':
-                                            subdic['args'][0] = [updates['chunk']]
-                                            print("New Chunk Size: ", subdic['args'][0])                                      
+                                            subdic['args'] = new_chunk
+                                            print("Writing new chunk size: ", new_chunk)                                      
                                         if 'directive' == k and v == 'application':
-                                            application_name = subdic['args'][0]
-                                            print("Application name found: ", application_name)
+                                            subdic['args'] = new_name
+                                            print("Writing new name: ", new_name)
                                             if 'block' in subdic:
-                                                for app_item in subdic['block']:
+                                                print("Before deleting dicts: ", subdic['block'])       
+                                                for app_item in subdic['block']:           
                                                     for j, k in app_item.items():
                                                         if 'live' == k:
-                                                            live_status = app_item['args'][0]
-                                                            print("Live status: ", live_status)                                                       
+                                                            app_item['args'] = new_livestatus
+                                                            print("New Live status: ", new_livestatus)                                                       
                                                         if 'push' == k:
-                                                            pushed_streams.append(app_item['args'][0])
+                                                            print("deleting app item")
+                                                            subdic['block'].remove(app_item)
+                                                            print("Current subdic value:", subdic['block'])
+
+                                                for stream in new_streams:
+                                                    stream_entry = {
+                                                        'directive':'push',
+                                                        'args': [stream]
+                                                    }
+                                                    subdic['block'].append(stream_entry)
+        #config['config'] = configs
+        self.payload = crossplane.build(configs[0]['parsed'])
+
+        # Write to file
+        conf_file = open("./nginx.conf", 'w')
+        n = conf_file.write(self.payload)
+        conf_file.close() 
 
     
-
-conf = NginxConf("./nginx.conf")
 

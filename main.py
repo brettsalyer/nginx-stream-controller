@@ -1,12 +1,12 @@
 from flask import Flask, redirect, url_for, request, render_template
+import nginx_conf as nginx
 
 app = Flask(__name__)
+conf = nginx.NginxConf("./nginx.conf")
 
 @app.route("/index")
 @app.route("/")
-def index():
-    import nginx_conf as nginx
-    conf = nginx.NginxConf("./nginx.conf")
+def index():  
     res = conf.fetch_rtmp_conf()
     return render_template("index.html", result=res)
 
@@ -19,13 +19,10 @@ def update():
     if request.method == 'POST':
         for x, y in request.form.items():
             print("Received: ", x, y)
+        conf.update_rtmp_conf(request.form)
 
         return redirect(url_for('index'))
 
-    else:
-        print("Received GET")
-        user = request.args.get('nm')
-        return redirect(url_for('success',name = user))
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8080, debug=True)
