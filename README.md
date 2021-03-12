@@ -7,6 +7,12 @@ This was written to solve a problem with my Church's live stream workflow. We us
 using the RTMP plugin. This plugin forwards all streams in the `nginx.conf` file. Rather than manually SSHing into the Raspberry Pi, editing the file, and then restarting
 the Nginx service - I made this web app to fascilitate all this for me.
 
+## Pre-requisites
+`pip3 install -r requirements.txt`
+
+This installs the latest version of Flask and crossplane, which are
+the only two requirements for this application to work.
+
 ## How It Works
 Simply name your application. This is what dictates what URL you would enter locally to retrieve the stream.
 
