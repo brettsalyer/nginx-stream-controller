@@ -28,3 +28,7 @@ Finally, all streaming destinations get added in the `Pushed Streams` section. A
 ## Finalizing
 Once you have everything configured the way you like, hit the `update` button. This writes the new configuration file.
 Hit `Restart` to restart the Nginx service.
+
+## Customizing
+You can change the page logo by replacing the `logo.png` file in the static directory.
+All other modifications can be made in the `index.html` template and the corresponding stylesheet.
