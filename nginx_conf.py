@@ -56,6 +56,17 @@ class NginxConf:
             "streams" : pushed_streams
         }
 
+    def clear_streams(self, stream_list):
+        new_list = []
+        key, value = 'directive', 'push'
+
+        for dict_item in stream_list:
+            print("Evaluating: ", dict_item)
+            if not (key in dict_item and value == dict_item[key]):
+                new_list.append(dict_item)
+        
+        return new_list
+
     def update_rtmp_conf(self, request_form):
         
         config = crossplane.parse(self.file) 
@@ -64,9 +75,16 @@ class NginxConf:
         request_form = request_form.to_dict(flat=False)
         print("Updating:", request_form)
 
+        # Remove buttons from formd data dict
+        if 'update' in request_form:
+            del(request_form['update'])
+        elif 'restart' in request_form:
+            del(request_form['restart'])
+
         new_name = request_form.pop('name')
         new_port = request_form.pop('port')
         new_chunk = request_form.pop('chunk')
+
         new_livestatus = None
         try:
             new_livestatus = request_form.pop('livestatus')
@@ -77,6 +95,8 @@ class NginxConf:
         new_streams = []
         for item in request_form:
             new_streams.append(item)
+        
+        print("New streams to be added:", new_streams)
 
         
 
@@ -101,23 +121,24 @@ class NginxConf:
                                             subdic['args'] = new_name
                                             print("Writing new name: ", new_name)
                                             if 'block' in subdic:
-                                                print("Before deleting dicts: ", subdic['block'])       
-                                                for app_item in subdic['block']:           
+                                                print("Before deleting dicts: ", subdic['block'])
+                                                subdic['block'] = self.clear_streams(subdic['block'])       
+                                                for app_item in subdic['block']:
                                                     for j, k in app_item.items():
                                                         if 'live' == k:
                                                             app_item['args'] = new_livestatus
                                                             print("New Live status: ", new_livestatus)                                                       
-                                                        if 'push' == k:
-                                                            print("deleting app item")
-                                                            subdic['block'].remove(app_item)
-                                                            print("Current subdic value:", subdic['block'])
+                                                print("After subdic value:", subdic['block'])
+
 
                                                 for stream in new_streams:
                                                     stream_entry = {
                                                         'directive':'push',
                                                         'args': [stream]
                                                     }
+                                                    print("Adding new dict")
                                                     subdic['block'].append(stream_entry)
+                                                new_streams = []
         #config['config'] = configs
         self.payload = crossplane.build(configs[0]['parsed'])
 

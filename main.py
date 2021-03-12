@@ -17,9 +17,12 @@ def success(results):
 @app.route("/update", methods=['POST', 'GET'])
 def update():
     if request.method == 'POST':
-        for x, y in request.form.items():
-            print("Received: ", x, y)
-        conf.update_rtmp_conf(request.form)
+        if 'update' in request.form:
+            for x, y in request.form.items():
+                print("Received: ", x, y)
+            conf.update_rtmp_conf(request.form)
+        else:
+            print("[INFO] Restarting the RTMP Nginx Server...")
 
         return redirect(url_for('index'))
 
