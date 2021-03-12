@@ -5,7 +5,7 @@ to create a web application, so I apologize for its inefficiencies.
 
 This was written to solve a problem with my Church's live stream workflow. We use OBS to send our stream to a Raspberry Pi 4 running an Nginx server
 using the RTMP plugin. This plugin forwards all streams in the `nginx.conf` file. Rather than manually SSHing into the Raspberry Pi, editing the file, and then restarting
-the Nginx service - I made this web app to fascilitate all this for me.
+the Nginx service - I made this web app to facilitate all this for me.
 
 ## Pre-requisites
 `pip3 install -r requirements.txt`
