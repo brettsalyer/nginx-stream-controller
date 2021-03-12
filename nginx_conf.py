@@ -1,4 +1,4 @@
-import crossplane
+import crossplane, socket
 
 class NginxConf:
 
@@ -8,6 +8,9 @@ class NginxConf:
         self.payload = None
 
     def fetch_rtmp_conf(self):
+        host = socket.gethostname()
+        ipaddr = socket.gethostbyname(host)
+
         sever_port = None
         chunk_size = None
         pushed_streams = []
@@ -49,11 +52,12 @@ class NginxConf:
                                                             pushed_streams.append(app_item['args'][0])
 
         return {
-            'port' : sever_port,
+            "port" : sever_port,
             "chunk" : chunk_size,
             "name" : application_name,
             "status" : live_status,
-            "streams" : pushed_streams
+            "streams" : pushed_streams,
+            "ip": ipaddr
         }
 
     def clear_streams(self, stream_list):
