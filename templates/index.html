@@ -27,7 +27,7 @@
   <h1 class="center header-roboto">Live Stream Configuration</h1>
   <br />
 
-  <form class="control center-div" action="http://localhost:8080/update" method='post'>
+  <form class="control center-div" action="{{url_for('update')}}" method='post'>
     <div class="input-group input-group-sm mb-3">
       <div class="input-group-prepend">
         <span class="input-group-text" id="inputGroup-sizing-sm">Application Name</span>
@@ -142,7 +142,7 @@
 
     <!--Control Buttons-->
     <div>
-      <button name="update" action="http://localhost:8080/update" class="btn btn-primary" type="submit">Update</button>
+      <button name="update" class="btn btn-primary" type="submit">Update</button>
       <button name="restart" class="btn btn-primary" type="submit">Restart</button>
     </div>
 
